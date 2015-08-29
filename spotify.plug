@@ -1,0 +1,9 @@
+[Core]
+Name = Spotify Notification
+Module = spotify
+
+[Documentation]
+Description = Notifies channel of current track playing.  OSX only (sorry!).
+
+[Python]
+Version = 2+
