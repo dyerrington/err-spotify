@@ -10,7 +10,7 @@ global_store = defaultdict() # had some problems with context, will refactor
 
 class spotify(BotPlugin):
 
-    store_file = 'plugins/err-mucutils/muc.cache'
+    store_file = 'plugins/err-spotify/spotify.cache'
     channel = "dyerrington@chat.livecoding.tv"
        
     def activate(self):
@@ -41,9 +41,12 @@ class spotify(BotPlugin):
             self.save_store()
 
     def restore_store(self):
-        store = pd.read_pickle(self.store_file)
-        for key, value in store.iloc[0].to_dict().items():
-            global_store[key]   =   value
+        try:
+            store = pd.read_pickle(self.store_file)
+            for key, value in store.iloc[0].to_dict().items():
+                global_store[key]   =   value
+        except:
+            self.save_store()
         # print "Restoring!!!!     ", global_store
 
     def save_store(self):
@@ -54,7 +57,7 @@ class spotify(BotPlugin):
         store.to_pickle(self.store_file)
 
     def get_current_track(self):
-        p = subprocess.Popen(['/usr/bin/osascript', 'plugins/spotify/currentTrack.scpt'], stdout=subprocess.PIPE)
+        p = subprocess.Popen(['/usr/bin/osascript', 'plugins/err-spotify/currentTrack.scpt'], stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
         p.stdout.close()
         return stdout
