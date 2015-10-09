@@ -12,7 +12,9 @@ class spotify(BotPlugin):
 
     store_file = 'plugins/err-spotify/spotify.cache'
     channel = "dyerrington@chat.livecoding.tv"
-       
+    current_track = ''
+    track_vote_skip = set()
+
     def activate(self):
 
          self.restore_store()
@@ -26,7 +28,7 @@ class spotify(BotPlugin):
         # print "current_store: ", global_store
         # print "current_track: ", current_track
 
-        if current_track != global_store['current_track']:
+        if current_track != self.current_track:
 
             # print "\n\n\n\n running callback \n\n\n"
 
@@ -37,7 +39,8 @@ class spotify(BotPlugin):
                 message_type="groupchat"#msg.type
             )
 
-            global_store['current_track'] = current_track
+            # global_store['current_track'] = current_track
+            self.current_track = current_track
             self.save_store()
 
     def restore_store(self):
@@ -56,11 +59,31 @@ class spotify(BotPlugin):
         print "our store is:", store.head()
         store.to_pickle(self.store_file)
 
+    def next_track(self):
+        p = subprocess.Popen(['/usr/bin/osascript', 'plugins/err-spotify/nextTrack.scpt'], stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        p.stdout.close()
+        return stdout
+
     def get_current_track(self):
         p = subprocess.Popen(['/usr/bin/osascript', 'plugins/err-spotify/currentTrack.scpt'], stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
         p.stdout.close()
         return stdout
+
+    @botcmd()
+    def track_skip(self, msg, args):
+        # say_vote_threashold
+        self.track_vote_skip.add(msg.nick)
+        if len(self.track_vote_skip) >= 3:
+            # self.track_vote_skip = "On"
+            self.next_track()
+            self.track_vote_skip = set()
+  
+            return "Vote passed.  Skipping to the next track." 
+        return "Current vote to skip next track: %d" % len(self.track_vote_skip)
+
+
 
     @botcmd()
     def track(self, msg, args):
